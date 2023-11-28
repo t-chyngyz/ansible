@@ -3,11 +3,7 @@
 - name: Users
   hosts: [3.68.82.154] #Ubuntu
   become: yes
-  vars:
-    document_root: /var/www/example
-    domainname: example.com
-    cert_dir: /etc/ssl/ansible-self-cert/
-
+    
   tasks:
   - name: Install nginx
     apt:

@@ -1,9 +1,7 @@
 ---
 - name: cert
-  hosts: [18.156.76.237] # Amazone linux 2
+  hosts: [CA] # Amazone linux 2
   become: yes
-  vars:
-    cert_dir: /etc/ssl/ansible-self-cert/
 
   tasks:
   - name: Install pip3
@@ -11,23 +9,27 @@
       name: python3-pip
       state: latest
       update_cache: yes
-    delegate_to: 3.68.82.154 # Ubuntu     
+    delegate_to: "{{item}}"
+    with_items: "{{groups.webservers}}" # Ubuntu     
 
   - name: Install pyOpenSSL
     shell: pip3 install --upgrade pip && pip3 install pyOpenSSL
-    delegate_to: 3.68.82.154 # Ubuntu
+    delegate_to: "{{item}}"
+    with_items: "{{groups.webservers}}" # Ubuntu    
 
   - name: Create a dir for cert
     ansible.builtin.file:
       path: "{{ cert_dir }}"
       state: directory
       mode: '0755'
-    delegate_to: 3.68.82.154
+    delegate_to: "{{item}}"
+    with_items: "{{groups.webservers}}" # Ubuntu    
 
   - name: Create private key for new certificate on webserver
     community.crypto.openssl_privatekey:
       path: "{{ cert_dir }}certificate.key"
-    delegate_to: 3.68.82.154
+    delegate_to: "{{item}}"
+    with_items: "{{groups.webservers}}" # Ubuntu    
     run_once: true
 
   - name: Create certificate signing request (CSR) for new certificate
@@ -37,29 +39,39 @@
         - "DNS:example.com"
         - "DNS:www.example.com"
         - "DNS:docs.example.com"
-    delegate_to: 3.68.82.154
+    delegate_to: "{{item}}"
+    with_items: "{{groups.webservers}}" # Ubuntu    
     run_once: true
     register: csr
 
   - name: Check whether certificate exists
     stat:
       path: "{{ cert_dir }}certificate.pem"
-    delegate_to: 3.68.82.154
+    # delegate_to: 18.185.105.174
+    delegate_to: "{{item}}"
+    with_items: "{{groups.webservers}}" # Ubuntu    
     run_once: true
     register: certificate_exists
+
+  # - debug:
+  #     msg: "{{ certificate_exists.results[0].stat.exists }}"
+  #   with_items: "{{groups.webservers}}" # Ubuntu
+
+  # - fail: # Fail task
 
   - name: Read existing certificate if exists
     slurp:
       src: "{{ cert_dir }}certificate.pem"
-    when: certificate_exists.stat.exists
-    delegate_to: 3.68.82.154
+    when: certificate_exists.results[0].stat.exists
+    delegate_to: "{{item}}"
+    with_items: "{{groups.webservers}}" # Ubuntu    
     run_once: true
     register: certificate
 
   - name: Sign certificate with our CA
     community.crypto.x509_certificate_pipe:
-      content: "{{ (certificate.content | b64decode) if certificate_exists.stat.exists else omit }}"
-      csr_content: "{{ csr.csr }}"
+      content: "{{ (certificate.results[0].content | b64decode) if certificate_exists.results[0].stat.exists else omit }}"
+      csr_content: "{{ csr.results[0].csr }}"
       provider: ownca
       ownca_path: "{{ cert_dir }}ca-certificate.pem"
       ownca_privatekey_path: "{{ cert_dir }}ca-certificate.key"
@@ -73,7 +85,8 @@
   - name: Write certificate file on webserver
     copy:
       dest: "{{ cert_dir }}certificate.pem"
-      content: "{{ certificate.certificate }}"
-    delegate_to: 3.68.82.154
+      content: "{{ certificate.results[0].certificate }}"
+    delegate_to: "{{item}}"
+    with_items: "{{groups.webservers}}" # Ubuntu    
     run_once: true
     when: certificate is changed

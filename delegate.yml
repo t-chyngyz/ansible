@@ -1,11 +1,9 @@
 ---
 - name: cert
-  hosts: localhost
-  become: yes
-  connection: local
+  hosts: CA
   
   tasks:
-  - shell: hostnamectl
-
-  - shell: hostnamectl
-    delegate_to: 3.68.82.154
+  - name: Install pip3
+    shell: hostnamectl
+    delegate_to: "{{item}}"
+    with_items: "{{groups.webservers}}" # Ubuntu     

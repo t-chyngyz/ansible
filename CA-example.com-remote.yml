@@ -1,9 +1,7 @@
 ---
 - name: CA
-  hosts: [18.156.76.237] # Amazone linux 2
+  hosts: [CA] # Amazone linux 2
   become: yes
-  vars:
-    cert_dir: /etc/ssl/ansible-self-cert/
 
   tasks:
   - name: Create a dir for cert

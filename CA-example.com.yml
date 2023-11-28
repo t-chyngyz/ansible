@@ -3,8 +3,6 @@
   hosts: localhost
   become: yes
   connection: local
-  vars:
-    cert_dir: /etc/ssl/ansible-self-cert/
 
   tasks:
   - name: Create private key with password protection
