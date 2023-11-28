@@ -3,3 +3,5 @@
 document_root: /var/www/example
 domainname: example.com
 cert_dir: /etc/ssl/ansible-self-cert/
+flask_dir: flask
+

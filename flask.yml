@@ -1,0 +1,7 @@
+---
+
+- hosts: webservers
+  become: true
+  gather_facts: false
+  roles:
+    - flask-simple-login

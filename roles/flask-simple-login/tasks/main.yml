@@ -1,0 +1,42 @@
+---
+
+# - name: Install git
+#   apt:
+#     name: "{{ item }}"
+#     state: latest
+#     update_cache: yes
+#   loop: [git, python3-pip, python3.10-venv]
+
+# - name: Create folder for Flask app
+#   file:
+#     path: "/opt/{{ flask_dir }}"
+#     state: directory
+
+# - name: Git clone
+#   shell: git clone https://github.com/t-chyngyz/Flask-SimpleLogin.git .
+#   args:
+#     chdir: /opt/{{ flask_dir }}/
+
+- name: Install Flask by shell
+  shell: python3 -m venv venv && . venv/bin/activate && pip3 install flask_simplelogin
+  args:
+    chdir: /opt/{{ flask_dir }}/
+
+- name: Copy simple-app.py to flask dir
+  copy:
+    src: "{{ item }}"
+    dest: /opt/{{ flask_dir }}/ 
+    mode: preserve
+  loop: [settings.py, simple-app.py, templates]
+
+- name: Run Flask by shell
+  shell: . venv/bin/activate && nohup python3 simple-app.py &
+  args:
+    chdir: /opt/{{ flask_dir }}/
+
+# - name: Install Flask
+#   become: false
+#   pip:
+#     name: flask
+#     virtualenv: /opt/{{ flask_dir }}/venv
+#     virtualenv_python: /usr/bin/python3.10

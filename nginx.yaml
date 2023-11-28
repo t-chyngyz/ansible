@@ -1,47 +1,8 @@
 ---
 
-- name: Users
-  hosts: [3.68.82.154] #Ubuntu
-  become: yes
-    
-  tasks:
-  - name: Install nginx
-    apt:
-      name: nginx
-      state: latest
-      update_cache: yes
-    
-  - name: Create document root dir for example.com
-    ansible.builtin.file:
-      path: "{{ document_root }}"
-      state: directory
-      mode: '0755'    
-
-  - name: Copy virtual hosts config file
-    template:
-      src: example.com.j2
-      dest: /etc/nginx/sites-available/{{ domainname }}
-    notify: Restart Nginx
- 
-  - name: Create soft link
-    file:
-      src: /etc/nginx/sites-available/{{ domainname }}
-      dest: /etc/nginx/sites-enabled/{{ domainname }}
-      state: link
-
-  - name: Copy index.html to document root
-    copy:
-      src: index.html
-      dest: "{{ document_root }}" 
-      mode: preserve
-  
-  - name: add example.com to hosts 
-    lineinfile:
-      path: /etc/hosts
-      line: "127.0.0.1  {{ domainname }}"
-
-  handlers:
-  - name: Restart Nginx
-    service:
-      name: nginx
-      state: restarted  
+- hosts: webservers
+  become: true
+  roles:
+    - nginx
+  # vars:
+  #   doc_root: /var/www/example
