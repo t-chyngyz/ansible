@@ -1,0 +1,40 @@
+---
+- name: CA
+  hosts: [18.156.76.237] # Amazone linux 2
+  become: yes
+  vars:
+    cert_dir: /etc/ssl/ansible-self-cert/
+
+  tasks:
+  - name: Create a dir for cert
+    ansible.builtin.file:
+      path: "{{ cert_dir }}"
+      state: directory
+      mode: '0755'
+
+  - name: Create private key with password protection
+    community.crypto.openssl_privatekey:
+      path: "{{ cert_dir }}ca-certificate.key"
+      # passphrase: "{{ secret_ca_passphrase }}"
+
+  - name: Create certificate signing request (CSR) for CA certificate
+    community.crypto.openssl_csr_pipe:
+      privatekey_path: "{{ cert_dir }}ca-certificate.key"
+      # privatekey_passphrase: "{{ secret_ca_passphrase }}"
+      common_name: Ansible CA
+      use_common_name_for_san: false  # since we do not specify SANs, don't use CN as a SAN
+      basic_constraints:
+        - 'CA:TRUE'
+      basic_constraints_critical: true
+      key_usage:
+        - keyCertSign
+      key_usage_critical: true
+    register: ca_csr
+
+  - name: Create self-signed CA certificate from CSR
+    community.crypto.x509_certificate:
+      path: "{{ cert_dir }}ca-certificate.pem"
+      csr_content: "{{ ca_csr.csr }}"
+      privatekey_path: "{{ cert_dir }}ca-certificate.key"
+      # privatekey_passphrase: "{{ secret_ca_passphrase }}"
+      provider: selfsigned

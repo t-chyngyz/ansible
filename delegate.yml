@@ -1,0 +1,11 @@
+---
+- name: cert
+  hosts: localhost
+  become: yes
+  connection: local
+  
+  tasks:
+  - shell: hostnamectl
+
+  - shell: hostnamectl
+    delegate_to: 3.68.82.154

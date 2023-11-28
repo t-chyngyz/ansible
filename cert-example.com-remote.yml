@@ -1,0 +1,79 @@
+---
+- name: cert
+  hosts: [18.156.76.237] # Amazone linux 2
+  become: yes
+  vars:
+    cert_dir: /etc/ssl/ansible-self-cert/
+
+  tasks:
+  - name: Install pip3
+    apt:
+      name: python3-pip
+      state: latest
+      update_cache: yes
+    delegate_to: 3.68.82.154 # Ubuntu     
+
+  - name: Install pyOpenSSL
+    shell: pip3 install --upgrade pip && pip3 install pyOpenSSL
+    delegate_to: 3.68.82.154 # Ubuntu
+
+  - name: Create a dir for cert
+    ansible.builtin.file:
+      path: "{{ cert_dir }}"
+      state: directory
+      mode: '0755'
+    delegate_to: 3.68.82.154
+
+  - name: Create private key for new certificate on webserver
+    community.crypto.openssl_privatekey:
+      path: "{{ cert_dir }}certificate.key"
+    delegate_to: 3.68.82.154
+    run_once: true
+
+  - name: Create certificate signing request (CSR) for new certificate
+    community.crypto.openssl_csr_pipe:
+      privatekey_path: "{{ cert_dir }}certificate.key"
+      subject_alt_name:
+        - "DNS:example.com"
+        - "DNS:www.example.com"
+        - "DNS:docs.example.com"
+    delegate_to: 3.68.82.154
+    run_once: true
+    register: csr
+
+  - name: Check whether certificate exists
+    stat:
+      path: "{{ cert_dir }}certificate.pem"
+    delegate_to: 3.68.82.154
+    run_once: true
+    register: certificate_exists
+
+  - name: Read existing certificate if exists
+    slurp:
+      src: "{{ cert_dir }}certificate.pem"
+    when: certificate_exists.stat.exists
+    delegate_to: 3.68.82.154
+    run_once: true
+    register: certificate
+
+  - name: Sign certificate with our CA
+    community.crypto.x509_certificate_pipe:
+      content: "{{ (certificate.content | b64decode) if certificate_exists.stat.exists else omit }}"
+      csr_content: "{{ csr.csr }}"
+      provider: ownca
+      ownca_path: "{{ cert_dir }}ca-certificate.pem"
+      ownca_privatekey_path: "{{ cert_dir }}ca-certificate.key"
+      # ownca_privatekey_passphrase: "{{ secret_ca_passphrase }}"
+      ownca_not_after: +365d  # valid for one year
+      ownca_not_before: "-1d"  # valid since yesterday
+    # delegate_to: server_2
+    run_once: true
+    register: certificate
+
+  - name: Write certificate file on webserver
+    copy:
+      dest: "{{ cert_dir }}certificate.pem"
+      content: "{{ certificate.certificate }}"
+    delegate_to: 3.68.82.154
+    run_once: true
+    when: certificate is changed

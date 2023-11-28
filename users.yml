@@ -1,0 +1,15 @@
+---
+
+- name: Users
+  hosts: [amazon]
+  become: yes
+
+  tasks:
+  - name: Add the user 'bob'
+    ansible.builtin.user:
+      name: bob
+      state: absent
+    when: ansible_facts['distribution'] == "Ubuntu"
+  - name: print
+    debug:
+      msg: ansible_facts['os_family']
