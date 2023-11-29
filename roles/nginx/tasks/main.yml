@@ -15,19 +15,21 @@
   ansible.builtin.file:
     path: "{{ document_root }}"
     state: directory
-    mode: '0755'    
+    mode: '0755'
 
 - name: Copy virtual hosts config file
   template:
-    src: example.com.j2
-    dest: /etc/nginx/sites-available/{{ domainname }}
+    src: "{{ item }}"
+    dest: /etc/nginx/sites-available/{{ item }}
+  loop: [example.com, flask.example.com]
   notify: Restart Nginx
 
 - name: Create soft link
   file:
-    src: /etc/nginx/sites-available/{{ domainname }}
-    dest: /etc/nginx/sites-enabled/{{ domainname }}
+    src: /etc/nginx/sites-available/{{ item }}
+    dest: /etc/nginx/sites-enabled/{{ item }}
     state: link
+  loop: [example.com, flask.example.com]
 
 - name: Copy index.html to document root
   copy:
@@ -38,7 +40,7 @@
 - name: add example.com to hosts 
   lineinfile:
     path: /etc/hosts
-    line: "127.0.0.1  {{ domainname }}"
+    line: "127.0.0.1  {{ domainname }} flask.{{ domainname }}"
 
 - name: Start nginx
   service: name=nginx state=started

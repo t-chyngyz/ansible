@@ -12,10 +12,10 @@
 
 [amazon]
 3.71.82.90 ansible_user=ec2-user ansible_ssh_private_key_file=/home/admin/devops.pem
-18.185.184.37 ansible_user=ubuntu ansible_ssh_private_key_file=/home/admin/devops.pem
+3.79.230.119 ansible_user=ubuntu ansible_ssh_private_key_file=/home/admin/devops.pem
 
 [webservers]
-18.185.184.37 ansible_user=ubuntu ansible_ssh_private_key_file=/home/admin/devops.pem
+3.79.230.119 ansible_user=ubuntu ansible_ssh_private_key_file=/home/admin/devops.pem
 
 [CA]
 3.71.82.90 ansible_user=ec2-user ansible_ssh_private_key_file=/home/admin/devops.pem

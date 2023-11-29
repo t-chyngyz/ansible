@@ -29,10 +29,16 @@
     mode: preserve
   loop: [settings.py, simple_app.py, templates, wsgi.py]
 
-- name: Run Flask by shell
-  shell: . venv/bin/activate && nohup gunicorn --bind 0.0.0.0:5000 wsgi:app &
-  args:
-    chdir: /opt/{{ flask_dir }}/
+- name: Render systemd service file and socket for gunicorn
+  template:
+    src: "{{ item }}"
+    dest: /etc/systemd/system/{{ item }}
+  loop: [gunicorn.service, gunicorn.socket]
+
+# - name: Run Flask by shell
+#   shell: . venv/bin/activate && nohup gunicorn --bind 0.0.0.0:5000 wsgi:app &
+#   args:
+#     chdir: /opt/{{ flask_dir }}/
 
 # - name: Install Flask
 #   become: false
