@@ -1,0 +1,64 @@
+---
+
+- hosts: database
+  become: true
+  vars:
+    msi_mysql_root_pass: ''
+
+  tasks:
+  - name: Install Utility software
+    apt: name={{item}} state=latest update_cache=yes
+    with_items:
+      - software-properties-common
+      - python3-mysqldb
+
+  - name: Install MariaDB Packages
+    apt: name={{item}} state=latest default_release=jammy update_cache=yes
+    with_items:
+      - mariadb-client
+      - mariadb-common
+      - mariadb-server
+
+  - name: Start MariaDB
+    service:
+      name=mysql
+      state=started
+  
+  - name: Set mysql root password
+    mysql_user:
+        login_user: root
+        login_password: "{{ msi_mysql_root_pass }}"
+        user: root
+        host_all: yes
+        password: "{{password}}"
+
+  - name: Disable remote root login
+    mysql_user:
+        login_user: root
+        login_password: "{{password}}"
+        user: root
+        host: "{{ ansible_fqdn | lower }}"
+        state: absent
+
+  - name: Remove anonymous users
+    mysql_user:
+        login_user: root
+        login_password: "{{password}}"
+        user: ''
+        host_all: yes
+        state: absent
+
+  - name: Remove test database
+    mysql_db: 
+        login_user: root
+        login_password: "{{password}}"
+        db: test
+        state: absent
+    register: remove_testdb
+
+  - name: Remove test database priviledges
+    block:
+      - shell: >
+          mysql -u root -p"{{password}}" 
+          -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'"
+      - shell: mysql -u root -p"{{password}}" -e "FLUSH PRIVILEGES"

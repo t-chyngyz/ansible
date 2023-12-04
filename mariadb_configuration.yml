@@ -1,0 +1,52 @@
+---
+
+- hosts: database
+  become: true
+  vars:
+    db_name: BookstoreDB
+    table1: >-
+      CREATE TABLE AuthorsTBL (
+          AuthorID INT NOT NULL AUTO_INCREMENT,
+          AuthorName VARCHAR(100),
+          PRIMARY KEY(AuthorID)
+      );
+    table2: >-
+      CREATE TABLE BooksTBL (
+          BookID INT NOT NULL AUTO_INCREMENT,
+          BookName VARCHAR(100) NOT NULL,
+          AuthorID INT NOT NULL,
+          BookPrice DECIMAL(6,2) NOT NULL,
+          BookLastUpdated TIMESTAMP,
+          BookIsAvailable BOOLEAN,
+          PRIMARY KEY(BookID),
+          FOREIGN KEY (AuthorID) REFERENCES AuthorsTBL(AuthorID)
+      );
+
+  tasks:
+  - name: Create myapp database
+    mysql_db:
+      name: "{{ db_name }}"
+      login_user: root
+      login_password: "{{password}}"
+      login_host: localhost
+      state: present
+
+  - name: Create user for myapp db
+    mysql_user:
+      name: "{{ db_user }}"
+      password: "{{ db_user_password }}"
+      priv: "{{ db_name }}.*:CREATE,SELECT,INSERT,UPDATE,DELETE"
+      login_user: root 
+      login_password: "{{password}}"
+      state: present
+
+  - name: Select query to test_db with named_args
+    community.mysql.mysql_query:
+      login_db: "{{ db_name }}"
+      login_user: "{{ db_user }}"
+      login_password: "{{ db_user_password }}"
+      login_host: localhost
+      query: "{{ item }}"
+    with_items:
+      - "{{ table1 }}"
+      - "{{ table2 }}"
