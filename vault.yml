@@ -1,0 +1,16 @@
+---
+- name: Vault
+  hosts: localhost
+  become: yes
+  connection: local
+
+  tasks:
+  - name: Print username
+    debug:
+      msg: "{{ username }}"
+  - name: Print password
+    debug:
+      msg: "{{ password }}"
+  - name: Print Token
+    debug:
+      msg: "{{ token }}"
