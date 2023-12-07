@@ -7,9 +7,12 @@
   tasks:
   - name: Add the user 'bob'
     ansible.builtin.user:
-      name: bob
-      state: absent
-    when: ansible_facts['distribution'] == "Ubuntu"
-  - name: print
-    debug:
-      msg: ansible_facts['os_family']
+      name: admin
+      state: present
+      generate_ssh_key: yes
+      ssh_key_bits: 2048
+      ssh_key_file: .ssh/id_rsa
+  #   when: ansible_facts['distribution'] == "Ubuntu"
+  # - name: print
+  #   debug:
+  #     msg: ansible_facts['os_family']
