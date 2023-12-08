@@ -1,0 +1,14 @@
+[Unit]
+Description=hello_env.js - making your environment variables rad
+Documentation=https://example.com
+After=network.target
+
+[Service]
+Environment=NODE_PORT=3000
+Type=simple
+User=admin
+ExecStart=/var/node/nodejs/node-v20.10.0-linux-x64/bin/node /var/node/hello/hello_env.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

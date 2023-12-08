@@ -1,0 +1,43 @@
+---
+
+- name: Download NodeJS
+  ansible.builtin.get_url:
+    url: https://nodejs.org/dist/v20.10.0/node-v20.10.0-linux-x64.tar.xz
+    dest: /tmp/nodejs.tar.xz
+
+- name: Create dir for NodeJS APP
+  ansible.builtin.file:
+    path: /var/node/{{ item }}
+    state: directory
+    mode: '0755'
+    recurse: yes
+  with_items: [hello, nodejs]
+
+- name: Extract NodeJS
+  ansible.builtin.unarchive:
+    src: /tmp/nodejs.tar.xz
+    dest: /var/node/nodejs
+    remote_src: yes
+
+- name: Copy NodeJS APP
+  copy:
+    src: hello_env.js
+    dest: /var/node/hello 
+    mode: preserve
+
+- name: Copy Systemd service file
+  copy:
+    src: hello_env.service
+    dest: /lib/systemd/system/ 
+    mode: preserve
+
+- name: Just force systemd to reread configs
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: Enable service NodeJS APP and ensure it is not masked
+  ansible.builtin.systemd_service:
+    name: hello_env
+    enabled: true
+    state: started
+    masked: no

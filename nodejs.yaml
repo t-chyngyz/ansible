@@ -1,0 +1,8 @@
+---
+
+- hosts: tag_Name_host1
+  become: true
+  roles:
+    - nodejs
+  # vars:
+  #   doc_root: /var/www/example
