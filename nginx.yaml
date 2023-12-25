@@ -1,0 +1,9 @@
+---
+
+- hosts: tag_env_dev 
+  become: true
+  tasks:
+  - name: Install httpd
+    dnf:
+      name: httpd
+      state: latest
