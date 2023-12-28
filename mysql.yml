@@ -3,6 +3,23 @@
 - hosts: tag_role_backend
   vars:
     db_name: BookstoreDB
+    table1: >-
+      CREATE TABLE AuthorsTBL (
+          AuthorID INT NOT NULL AUTO_INCREMENT,
+          AuthorName VARCHAR(100),
+          PRIMARY KEY(AuthorID)
+      );
+    table2: >-
+      CREATE TABLE BooksTBL (
+          BookID INT NOT NULL AUTO_INCREMENT,
+          BookName VARCHAR(100) NOT NULL,
+          AuthorID INT NOT NULL,
+          BookPrice DECIMAL(6,2) NOT NULL,
+          BookLastUpdated TIMESTAMP,
+          BookIsAvailable BOOLEAN,
+          PRIMARY KEY(BookID),
+          FOREIGN KEY (AuthorID) REFERENCES AuthorsTBL(AuthorID)
+      );
 
   tasks:
   - name: Create myapp database
@@ -12,3 +29,14 @@
       login_password: "{{ password }}"
       login_host: test.c7qikme0qyh9.eu-central-1.rds.amazonaws.com
       state: present
+
+  - name: Select query to test_db with named_args
+    community.mysql.mysql_query:
+      login_db: "{{ db_name }}"
+      login_user: admin
+      login_password: "{{ password }}"
+      login_host: test.c7qikme0qyh9.eu-central-1.rds.amazonaws.com
+      query: "{{ item }}"
+    with_items:
+      - "{{ table1 }}"
+      - "{{ table2 }}"
