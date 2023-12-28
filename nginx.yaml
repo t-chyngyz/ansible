@@ -1,8 +1,9 @@
 ---
 
-- hosts: webservers
+- hosts: tag_env_dev 
   become: true
-  roles:
-    - nginx
-  # vars:
-  #   doc_root: /var/www/example
+  tasks:
+  - name: Install httpd
+    dnf:
+      name: httpd
+      state: latest

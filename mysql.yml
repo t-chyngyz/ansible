@@ -1,0 +1,14 @@
+---
+
+- hosts: tag_role_backend
+  vars:
+    db_name: BookstoreDB
+
+  tasks:
+  - name: Create myapp database
+    mysql_db:
+      name: "{{ db_name }}"
+      login_user: admin
+      login_password: "{{ password }}"
+      login_host: test.c7qikme0qyh9.eu-central-1.rds.amazonaws.com
+      state: present
