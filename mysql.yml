@@ -20,6 +20,21 @@
           PRIMARY KEY(BookID),
           FOREIGN KEY (AuthorID) REFERENCES AuthorsTBL(AuthorID)
       );
+    insert_table1: >-
+      INSERT INTO AuthorsTBL (AuthorID, AuthorName) 
+        VALUES ('1', 'Agatha Christie'), 
+               ('2', 'Stephen King'), 
+               ('3', 'Paulo Coelho');
+    insert_table2: >-
+      INSERT INTO BooksTBL (BookName, AuthorID, BookPrice, BookIsAvailable)
+        VALUES ('And Then There Were None', 1, 14.95, 1),
+        ('The Man in the Brown Suit', 1, 23.99, 1),
+        ('The Stand', 2, 35.99, 1),
+        ('Pet Sematary', 2, 17.95, 0),
+        ('The Green Mile', 2, 29.99, 1),
+        ('The Alchemist', 3, 25, 1),
+        ('By the River Piedra I Sat Down and Wept', 3, 18.95, 0);
+
 
   tasks:
   - name: Create myapp database
@@ -30,7 +45,7 @@
       login_host: test.c7qikme0qyh9.eu-central-1.rds.amazonaws.com
       state: present
 
-  - name: Select query to test_db with named_args
+  - name: Create query to test_db with named_args
     community.mysql.mysql_query:
       login_db: "{{ db_name }}"
       login_user: admin
@@ -40,3 +55,14 @@
     with_items:
       - "{{ table1 }}"
       - "{{ table2 }}"
+
+  - name: Insert query to test_db with named_args
+    community.mysql.mysql_query:
+      login_db: "{{ db_name }}"
+      login_user: admin
+      login_password: "{{ password }}"
+      login_host: test.c7qikme0qyh9.eu-central-1.rds.amazonaws.com
+      query: "{{ item }}"
+    with_items:
+      - "{{ insert_table1 }}"
+      - "{{ insert_table2 }}"
