@@ -1,0 +1,46 @@
+---
+
+- name: Install git
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  loop: [git, python3-pip, python3.10-venv, gcc, default-libmysqlclient-dev, pkg-config]
+
+- name: Create folder for Flask app
+  file:
+    path: "/opt/{{ flask_dir }}"
+    state: directory
+
+- name: Git clone
+  shell: git clone https://github.com/t-chyngyz/DevOps-Project-5.git .
+  args:
+    chdir: /opt/{{ flask_dir }}/
+
+- name: Install Flask by shell
+  shell: python3 -m venv venv && . venv/bin/activate && pip3 install mysqlclient gunicorn 
+  args:
+    chdir: /opt/{{ flask_dir }}/
+
+- name: Install modules from requirements.txt
+  shell: python3 -m venv venv && . venv/bin/activate && pip3 install --no-cache-dir -r requirements.txt 
+  args:
+    chdir: /opt/{{ flask_dir }}/
+
+- name: Copy templates and wsgi.py to flask dir
+  copy:
+    src: "{{ item }}"
+    dest: /opt/{{ flask_dir }}/ 
+    mode: preserve
+  loop: [templates, wsgi.py]
+
+- name: Render app.py to flask dir
+  template:
+    src: app.py
+    dest: /opt/{{ flask_dir }}/
+
+- name: Render systemd service file and socket for gunicorn
+  template:
+    src: "{{ item }}"
+    dest: /etc/systemd/system/{{ item }}
+  loop: [gunicorn.service, gunicorn.socket]
