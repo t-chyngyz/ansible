@@ -3,5 +3,7 @@
 - hosts: tag_role_flask
   become: true
   gather_facts: false
+  vars:
+    flask_dir: flask
   roles:
     - flask-simple

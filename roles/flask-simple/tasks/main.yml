@@ -5,7 +5,7 @@
     name: "{{ item }}"
     state: latest
     update_cache: yes
-  loop: [git, python3-pip, python3.10-venv, gcc, default-libmysqlclient-dev, pkg-config]
+  loop: [git, python3-pip, python3.10-venv, gcc, default-libmysqlclient-dev, pkg-config, python3-mysqldb]
 
 - name: Create folder for Flask app
   file:
@@ -13,7 +13,7 @@
     state: directory
 
 - name: Git clone
-  shell: git clone https://github.com/t-chyngyz/DevOps-Project-5.git .
+  shell: git clone https://github.com/t-chyngyz/DevOps-Project-5.git . || git pull
   args:
     chdir: /opt/{{ flask_dir }}/
 
@@ -26,6 +26,22 @@
   shell: python3 -m venv venv && . venv/bin/activate && pip3 install --no-cache-dir -r requirements.txt 
   args:
     chdir: /opt/{{ flask_dir }}/
+
+- name: Create myapp database
+  mysql_db:
+    name: "{{ db_name }}"
+    login_user: '{{ mysql_user }}'
+    login_password: '{{ mysql_password }}'
+    login_host: "{{ mysql_endpoint }}"
+    state: present
+
+- name: Insert query to test_db with named_args
+  community.mysql.mysql_query:
+    login_db: "{{ db_name }}"
+    login_user: '{{ mysql_user }}'
+    login_password: '{{ mysql_password }}'
+    login_host: "{{ mysql_endpoint }}"
+    query: "{{ mysql_query }}"
 
 - name: Copy templates and wsgi.py to flask dir
   copy:

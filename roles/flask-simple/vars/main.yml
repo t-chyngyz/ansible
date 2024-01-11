@@ -1,3 +1,9 @@
 ---
 
 mysql_endpoint: database-1.c7qikme0qyh9.eu-central-1.rds.amazonaws.com
+db_name: myDb
+mysql_query: >-
+    CREATE TABLE IF NOT EXISTS messages (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      message TEXT
+    );

@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', '{{ mysql_endpoint }}')
 app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', '{{ mysql_user }}')
 app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', '{{ mysql_password }}')
-app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'default_db')
+app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', '{{ db_name }}')
 
 # Initialize MySQL
 mysql = MySQL(app)
@@ -29,3 +29,6 @@ def submit():
     mysql.connection.commit()
     cur.close()
     return redirect(url_for('hello'))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
