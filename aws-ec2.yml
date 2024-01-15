@@ -1,0 +1,27 @@
+---
+
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    key_name: devops             # Key used for SSH
+    region: eu-central-1       # Region may affect response and pricing
+    image: ami-0e0cbc26960fa5f7b # look in ec2 > ami (filter owner alias: amazon) or amis of manually launched instances
+    instance_type: t2.micro       # Choose instance type, check AWS for pricing
+    vpc_id: subnet-021e8e0c815b19e9e
+    sec_group: "sg-00dace059ff291b3a"  
+
+  tasks:      
+    - name: Start an instance with a public IP address
+      amazon.aws.ec2_instance:
+        name: "from-ansible"
+        key_name: "{{ key_name }}"
+        vpc_subnet_id: "{{ vpc_id }}"
+        instance_type: "{{ instance_type }}"
+        security_group: "{{ sec_group }}"
+        region: "{{ region }}"
+        network:
+          assign_public_ip: true
+        image_id: "{{ image }}"
+        tags:
+          role: nginx
