@@ -1,21 +1,21 @@
 ---
 
-# - name: Install git
-#   apt:
-#     name: "{{ item }}"
-#     state: latest
-#     update_cache: yes
-#   loop: [git, python3-pip, python3.10-venv]
+- name: Install git
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  loop: [git, python3-pip, python3.10-venv]
 
-# - name: Create folder for Flask app
-#   file:
-#     path: "/opt/{{ flask_dir }}"
-#     state: directory
+- name: Create folder for Flask app
+  file:
+    path: "/opt/{{ flask_dir }}"
+    state: directory
 
-# - name: Git clone
-#   shell: git clone https://github.com/t-chyngyz/Flask-SimpleLogin.git .
-#   args:
-#     chdir: /opt/{{ flask_dir }}/
+- name: Git clone
+  shell: git clone https://github.com/t-chyngyz/Flask-SimpleLogin.git .
+  args:
+    chdir: /opt/{{ flask_dir }}/
 
 - name: Install Flask by shell
   shell: python3 -m venv venv && . venv/bin/activate && pip3 install flask_simplelogin gunicorn 
@@ -34,6 +34,9 @@
     src: "{{ item }}"
     dest: /etc/systemd/system/{{ item }}
   loop: [gunicorn.service, gunicorn.socket]
+
+- name: Start gunicorn
+  service: name=gunicorn state=started
 
 # - name: Run Flask by shell
 #   shell: . venv/bin/activate && nohup gunicorn --bind 0.0.0.0:5000 wsgi:app &

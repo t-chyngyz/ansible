@@ -29,10 +29,10 @@
   args:
     chdir: /opt/{{ flask_dir }}/
 
-# - name: Run Flask by shell
-#   shell: . venv/bin/activate && nohup python3 run.py &
-#   args:
-#     chdir: /opt/{{ flask_dir }}/
+- name: Run Flask by shell
+  shell: . venv/bin/activate && nohup python3 run.py &
+  args:
+    chdir: /opt/{{ flask_dir }}/
 
 
   
