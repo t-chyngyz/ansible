@@ -1,9 +1,9 @@
 ---
 
-- name: Stop Apache2
-  service: 
-    name: apache2 
-    state: stopped
+# - name: Stop Apache2
+#   service: 
+#     name: apache2 
+#     state: stopped
 
 - name: Install nginx
   apt:
